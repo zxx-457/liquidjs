@@ -21,12 +21,19 @@ jobs:
         run: |
           npm run lint
           npm run test
+      - name: Performance
+        run: |
+          ls bin
+          sh ./bin/perf-foo.sh
+          npm run perf:foo
+          npm run perf:diff
       - name: Coverage
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Performance
         run: |
-          ls
           ls bin
+          sh ./bin/perf-foo.sh
+          npm run perf:foo
           npm run perf:diff
