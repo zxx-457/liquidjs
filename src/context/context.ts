@@ -2,9 +2,7 @@ import { Drop } from '../drop/drop'
 import { __assign } from 'tslib'
 import { NormalizedFullOptions, defaultOptions, RenderOptions } from '../liquid-options'
 import { Scope } from './scope'
-import { isArray, isNil, isString, isFunction, toLiquid } from '../util/underscore'
-import { InternalUndefinedVariableError } from '../util/error'
-import { toValueSync } from '../util/async'
+import { isArray, isNil, isString, isFunction, toLiquid, InternalUndefinedVariableError, toValueSync } from '../util'
 
 type PropertyKey = string | number;
 
@@ -103,19 +101,19 @@ export class Context {
 }
 
 export function readProperty (obj: Scope, key: PropertyKey, ownPropertyOnly: boolean) {
-  if (isNil(obj)) return obj
   obj = toLiquid(obj)
+  if (isNil(obj)) return obj
   if (isArray(obj) && key < 0) return obj[obj.length + +key]
-  const jsProperty = readJSProperty(obj, key, ownPropertyOnly)
-  if (jsProperty === undefined && obj instanceof Drop) return obj.liquidMethodMissing(key)
-  if (isFunction(jsProperty)) return jsProperty.call(obj)
+  const value = readJSProperty(obj, key, ownPropertyOnly)
+  if (value === undefined && obj instanceof Drop) return obj.liquidMethodMissing(key)
+  if (isFunction(value)) return value.call(obj)
   if (key === 'size') return readSize(obj)
   else if (key === 'first') return readFirst(obj)
   else if (key === 'last') return readLast(obj)
-  return jsProperty
+  return value
 }
 export function readJSProperty (obj: Scope, key: PropertyKey, ownPropertyOnly: boolean) {
-  if (ownPropertyOnly && !Object.hasOwnProperty.call(obj, key)) return undefined
+  if (ownPropertyOnly && !Object.hasOwnProperty.call(obj, key) && !(obj instanceof Drop)) return undefined
   return obj[key]
 }
 

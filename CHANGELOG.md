@@ -1,3 +1,79 @@
+## [10.3.2](https://github.com/harttle/liquidjs/compare/v10.3.1...v10.3.2) (2022-12-13)
+
+
+### Bug Fixes
+
+* re-export error classes, [#569](https://github.com/harttle/liquidjs/issues/569) ([2663ee1](https://github.com/harttle/liquidjs/commit/2663ee16a066c74cbd387fe40154fdeb2136f35a))
+
+## [10.3.1](https://github.com/harttle/liquidjs/compare/v10.3.0...v10.3.1) (2022-12-12)
+
+
+### Bug Fixes
+
+* support `Context` as `evalValue` parameter, [#568](https://github.com/harttle/liquidjs/issues/568) ([0f4916b](https://github.com/harttle/liquidjs/commit/0f4916bc5a93f5e744e4246336c68f2e89774272))
+
+# [10.3.0](https://github.com/harttle/liquidjs/compare/v10.2.0...v10.3.0) (2022-12-11)
+
+
+### Features
+
+* support disable outputEscape for specific filters, [#565](https://github.com/harttle/liquidjs/issues/565) ([e6db371](https://github.com/harttle/liquidjs/commit/e6db371519f0fb3b0068347cfb2016aed386c8fa))
+
+# [10.2.0](https://github.com/harttle/liquidjs/compare/v10.1.0...v10.2.0) (2022-12-02)
+
+
+### Bug Fixes
+
+* `case` should render multiple `when` statements ([d17813e](https://github.com/harttle/liquidjs/commit/d17813ef5217264bd08f741b0e1f713bedf2d464))
+
+
+### Features
+
+* add remove_last filter ([6c3f1c1](https://github.com/harttle/liquidjs/commit/6c3f1c1e0c0c5d30ef77eaf20df65e149e51e693))
+* add replace_last filter ([b4d1e27](https://github.com/harttle/liquidjs/commit/b4d1e27420fcf36ae6d5dbc92cfe4a26299690f2))
+
+# [10.1.0](https://github.com/harttle/liquidjs/compare/v10.0.0...v10.1.0) (2022-11-29)
+
+
+### Features
+
+* timezone name for `opts.timezoneOffset` and `date` argument, fixes [#553](https://github.com/harttle/liquidjs/issues/553) ([89c6c76](https://github.com/harttle/liquidjs/commit/89c6c7676d40f23090472a28cbf2fb22f93daad3))
+
+# [10.0.0](https://github.com/harttle/liquidjs/compare/v9.43.0...v10.0.0) (2022-11-27)
+
+
+### Code Refactoring
+
+* rename filters to snake style, [#487](https://github.com/harttle/liquidjs/issues/487) ([ff112a4](https://github.com/harttle/liquidjs/commit/ff112a4750f91475e9eccdb301d7a468e895f6ca))
+* `_evalToken` renamed to `evalToken` ([4e1a30a](https://github.com/harttle/liquidjs/commit/4e1a30a20c579408c87f2d28b9b6ec8e1dda65cc))
+* change `ownPropertyOnly` default value to `true` ([7eb6216](https://github.com/harttle/liquidjs/commit/7eb621601c2b05d6e379e5ce42219f2b1f556208))
+* delay creation of `operatorsTrie` and hide this implementation ([bb58d3e](https://github.com/harttle/liquidjs/commit/bb58d3e549dc5a5e067895ec4a0b3257b434f225))
+* remove `toThenable` export ([ffefd91](https://github.com/harttle/liquidjs/commit/ffefd91fbc0195c589c8c34ae80f2017acfe557c))
+* remove use of internal `Context` class in `evalValue` argument ([b115077](https://github.com/harttle/liquidjs/commit/b115077e122a7b90e7972d58174d68aea8edd7bf))
+
+
+### Performance Improvements
+
+* target Node.js 14 for cjs bundle (main entry) ([1f6ce7c](https://github.com/harttle/liquidjs/commit/1f6ce7c8224123cea318d1aa6c12aa091d6e0518))
+
+
+### BREAKING CHANGES
+
+* `evalToken` now returns a generator (LiquidJS async), which is different from `evalToken` in previous LiquidJS versions.
+* main entry need Node.js>=14 to run, you can build LiquidJS by your own by using ESM entry.
+* `ownPropertyOnly` default value changed to `true`
+* `<liquidjs>.toThenable` is removed, use `<liquidjs>.toPromise` instead
+* `evalValue` won't support `Context` as second argument anymore.
+* use `operators` instead of `operatorsTrie` as Tokenizer constructor argument, #500
+* keys in `<liquidjs>.filters` are now in snake case (instead of camel case), identical to that in Liquid template.
+
+# [9.43.0](https://github.com/harttle/liquidjs/compare/v9.42.1...v9.43.0) (2022-11-27)
+
+
+### Features
+
+* support timezone offset argument for date filter, [#553](https://github.com/harttle/liquidjs/issues/553) ([7a71485](https://github.com/harttle/liquidjs/commit/7a714855df9ba188e2e82839d248f6623ce94a87))
+
 ## [9.42.1](https://github.com/harttle/liquidjs/compare/v9.42.0...v9.42.1) (2022-10-21)
 
 

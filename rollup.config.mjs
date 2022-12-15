@@ -16,6 +16,7 @@ const treeshake = {
   propertyReadSideEffects: false
 }
 const tsconfig = (target) => ({
+  check: true,
   tsconfigOverride: {
     include: [ 'src' ],
     exclude: [ 'test', 'benchmark' ],
@@ -37,16 +38,16 @@ const versionInjection = versionInjector({
   logger: console,
   exclude: []
 })
-const input = './src/liquid.ts'
+const input = './src/index.ts'
 const browserFS = {
   include: './src/liquid-options.ts',
   delimiters: ['', ''],
   './fs/node': './fs/browser'
 }
 const browserStream = {
-  include: './src/render/render.ts',
+  include: './src/emitters/index.ts',
   delimiters: ['', ''],
-  '../emitters/streamed-emitter': '../emitters/streamed-emitter-browser'
+  './streamed-emitter': './streamed-emitter-browser'
 }
 const esmRequire = {
   include: './src/fs/node.ts',
@@ -60,8 +61,8 @@ const nodeCjs = {
     format: 'cjs',
     banner
   }],
-  external: ['path', 'fs'],
-  plugins: [versionInjection, typescript(tsconfig('es5'))],
+  external: ['path', 'fs', 'stream'],
+  plugins: [versionInjection, typescript(tsconfig('ES2020'))],
   treeshake,
   input
 }
@@ -72,7 +73,7 @@ const nodeEsm = {
     format: 'esm',
     banner
   }],
-  external: ['path', 'fs'],
+  external: ['path', 'fs', 'stream'],
   plugins: [
     versionInjection,
     replace(esmRequire),

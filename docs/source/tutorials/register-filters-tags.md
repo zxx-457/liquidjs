@@ -6,14 +6,14 @@ title: Register Filters/Tags
 
 ```typescript
 // Usage: {% upper name %}
-import { TagToken, Context, Emitter, TopLevelToken } from 'liquidjs'
+import { Value, TagToken, Context, Emitter, TopLevelToken } from 'liquidjs'
 
 engine.registerTag('upper', {
     parse: function(tagToken: TagToken, remainTokens: TopLevelToken[]) {
-        this.str = tagToken.args; // name
+        this.value = new Value(token.args, liquid)
     },
-    render: async function(ctx: Context) {
-        var str = await this.liquid.evalValue(this.str, ctx); // 'alice'
+    render: function*(ctx: Context) {
+        const str = yield this.value.value(ctx); // 'alice'
         return str.toUpperCase() // 'ALICE'
     }
 });
@@ -22,7 +22,26 @@ engine.registerTag('upper', {
 * `parse`: Read tokens from `remainTokens` until your end token.
 * `render`: Combine scope data with your parsed tokens into HTML string.
 
-See existing tag implementations here: <https://github.com/harttle/liquidjs/tree/master/src/builtin/tags>
+For complex tag implementation, you can also provide a tag class:
+
+```typescript
+// Usage: {% upper name:"alice" %}
+import { Hash, Tag, TagToken, Context, Emitter, TopLevelToken, Liquid } from 'liquidjs'
+
+engine.registerTag('upper', class UpperTag extends Tag {
+    private hash: Hash
+    constructor(tagToken: TagToken, remainTokens: TopLevelToken[], liquid: Liquid) {
+        super(tagToken, remainTokens, liquid)
+        this.hash = new Hash(tagToken.args)
+    }
+    * render(ctx: Context) {
+        const hash = yield this.hash.render();
+        return hash.name.toUpperCase() // 'ALICE'
+    }
+});
+```
+
+See existing tag implementations here: <https://github.com/harttle/liquidjs/tree/master/src/tags>
 See demo example here: https://github.com/harttle/liquidjs/blob/master/demo/typescript/index.ts
 
 ## Register Filters
@@ -39,7 +58,7 @@ Filter arguments will be passed to the registered filter function, for example:
 engine.registerFilter('add', (initial, arg1, arg2) => initial + arg1 + arg2)
 ```
 
-See existing filter implementations here: <https://github.com/harttle/liquidjs/tree/master/src/builtin/filters>
+See existing filter implementations here: <https://github.com/harttle/liquidjs/tree/master/src/filters>
 
 ## Unregister Tags/Filters
 

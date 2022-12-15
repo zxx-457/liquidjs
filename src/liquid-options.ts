@@ -1,17 +1,10 @@
-import { snakeCase, forOwn, isArray, isString, isFunction } from './util/underscore'
-import { LiquidCache } from './cache/cache'
-import { LRU } from './cache/lru'
+import { assert, isArray, isString, isFunction } from './util'
+import { LRU, LiquidCache } from './cache'
 import { FS } from './fs/fs'
 import * as fs from './fs/node'
-import { defaultOperators, Operators } from './render/operator'
-import { createTrie, Trie } from './util/operator-trie'
-import * as builtinFilters from './builtin/filters'
-import { assert, FilterImplOptions } from './types'
-
-const filters = new Map()
-forOwn(builtinFilters, (conf: FilterImplOptions, name: string) => {
-  filters.set(snakeCase(name), conf)
-})
+import { defaultOperators, Operators } from './render'
+import { json } from './filters/misc'
+import { escape } from './filters/html'
 
 type OutputEscape = (value: any) => string
 type OutputEscapeOption = 'escape' | 'json' | OutputEscape
@@ -43,8 +36,8 @@ export interface LiquidOptions {
   ownPropertyOnly?: boolean;
   /** Modifies the behavior of `strictVariables`. If set, a single undefined variable will *not* cause an exception in the context of the `if`/`elsif`/`unless` tag and the `default` filter. Instead, it will evaluate to `false` and `null`, respectively. Irrelevant if `strictVariables` is not set. Defaults to `false`. **/
   lenientIf?: boolean;
-  /** JavaScript timezoneOffset for `date` filter, default to local time. That means if you're in Australia (UTC+10), it'll default to -600 */
-  timezoneOffset?: number;
+  /** JavaScript timezone name or timezoneOffset for `date` filter, default to local time. That means if you're in Australia (UTC+10), it'll default to `-600` or `Australia/Lindeman` */
+  timezoneOffset?: number | string;
   /** Strip blank characters (including ` `, `\t`, and `\r`) from the right of tags (`{% %}`) until `\n` (inclusive). Defaults to `false`. */
   trimTagRight?: boolean;
   /** Similar to `trimTagRight`, whereas the `\n` is exclusive. Defaults to `false`. See Whitespace Control for details. */
@@ -104,7 +97,6 @@ interface NormalizedOptions extends LiquidOptions {
   layouts?: string[];
   cache?: LiquidCache;
   outputEscape?: OutputEscape;
-  operatorsTrie?: Trie;
 }
 
 export interface NormalizedFullOptions extends NormalizedOptions {
@@ -135,7 +127,6 @@ export interface NormalizedFullOptions extends NormalizedOptions {
   globals: object;
   keepOutputType: boolean;
   operators: Operators;
-  operatorsTrie: Trie;
 }
 
 export const defaultOptions: NormalizedFullOptions = {
@@ -161,18 +152,14 @@ export const defaultOptions: NormalizedFullOptions = {
   preserveTimezones: false,
   strictFilters: false,
   strictVariables: false,
-  ownPropertyOnly: false,
+  ownPropertyOnly: true,
   lenientIf: false,
   globals: {},
   keepOutputType: false,
-  operators: defaultOperators,
-  operatorsTrie: createTrie(defaultOperators)
+  operators: defaultOperators
 }
 
 export function normalize (options: LiquidOptions): NormalizedFullOptions {
-  if (options.hasOwnProperty('operators')) {
-    (options as NormalizedOptions).operatorsTrie = createTrie(options.operators!)
-  }
   if (options.hasOwnProperty('root')) {
     if (!options.hasOwnProperty('partials')) options.partials = options.root
     if (!options.hasOwnProperty('layouts')) options.layouts = options.root
@@ -196,15 +183,11 @@ export function normalize (options: LiquidOptions): NormalizedFullOptions {
   return options as NormalizedFullOptions
 }
 
-function getOutputEscapeFunction (nameOrFunction: OutputEscapeOption) {
-  if (isString(nameOrFunction)) {
-    const filterImpl = filters.get(nameOrFunction)
-    assert(isFunction(filterImpl), `filter "${nameOrFunction}" not found`)
-    return filterImpl
-  } else {
-    assert(isFunction(nameOrFunction), '`outputEscape` need to be of type string or function')
-    return nameOrFunction
-  }
+function getOutputEscapeFunction (nameOrFunction: OutputEscapeOption): OutputEscape {
+  if (nameOrFunction === 'escape') return escape
+  if (nameOrFunction === 'json') return json
+  assert(isFunction(nameOrFunction), '`outputEscape` need to be of type string or function')
+  return nameOrFunction
 }
 
 export function normalizeDirectoryList (value: any): string[] {

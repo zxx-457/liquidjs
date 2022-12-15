@@ -81,7 +81,7 @@ export function isIterable (value: any): value is Iterable<any> {
  * @return {Object} Returns object.
  */
 export function forOwn <T> (
-  obj: {[key: string]: T} | undefined,
+  obj: Record<string, T> | undefined,
   iteratee: ((val: T, key: string, obj: {[key: string]: T}) => boolean | void)
 ) {
   obj = obj || {}
@@ -135,13 +135,6 @@ export function pad (str: any, length: number, ch: string, add: (str: string, ch
 
 export function identify<T> (val: T): T {
   return val
-}
-
-export function snakeCase (str: string) {
-  return str.replace(
-    /(\w?)([A-Z])/g,
-    (_, a, b) => (a ? a + '_' : '') + b.toLowerCase()
-  )
 }
 
 export function changeCase (str: string): string {

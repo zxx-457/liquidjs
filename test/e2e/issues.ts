@@ -1,4 +1,4 @@
-import { Tokenizer, Context, Liquid, Drop, defaultOptions, toValueSync } from '../..'
+import { Tokenizer, Context, Liquid, Drop, toValueSync } from '../..'
 import { expect, use } from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
 import * as sinon from 'sinon'
@@ -261,7 +261,7 @@ describe('Issues', function () {
     expect(() => engine.parse('{% assign headshot = https://testurl.com/not_enclosed_in_quotes.jpg %}')).to.throw(/unexpected token at ":/)
   })
   it('#527 export Liquid Expression', () => {
-    const tokenizer = new Tokenizer('a > b', defaultOptions.operatorsTrie)
+    const tokenizer = new Tokenizer('a > b')
     const expression = tokenizer.readExpression()
     const result = toValueSync(expression.evaluate(new Context({ a: 1, b: 2 })))
     expect(result).to.equal(false)
@@ -328,5 +328,22 @@ describe('Issues', function () {
     expect(await liquid.parseAndRender('{{h.h}}', context)).to.equal('1')
     expect(await liquid.parseAndRender('{{i.i}}', context)).to.equal('1')
     expect(await liquid.parseAndRender('{{j.j}}', context)).to.equal('1')
+  })
+  it('#559 Case/When should evaluate multiple When statements', async () => {
+    const liquid = new Liquid()
+    const tpl = `
+      {% assign tag = 'Love' %}
+
+      {% case tag %}
+        {% when 'Love' or 'Luck' %}
+          This is a love or luck potion.
+        {% when 'Strength','Health', 'Love' %}
+          This is a strength or health or love potion.
+        {% else %}
+          This is a potion.
+      {% endcase %}
+    `
+    const html = await liquid.parseAndRender(tpl)
+    expect(html).to.match(/^\s*This is a love or luck potion.\s+This is a strength or health or love potion.\s*$/)
   })
 })

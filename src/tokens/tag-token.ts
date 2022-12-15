@@ -1,8 +1,7 @@
 import { DelimitedToken } from './delimited-token'
 import { TokenizationError } from '../util/error'
-import { NormalizedFullOptions } from '../liquid-options'
-import { TokenKind } from '../parser/token-kind'
-import { Tokenizer } from '../parser/tokenizer'
+import { Tokenizer, TokenKind } from '../parser'
+import type { NormalizedFullOptions } from '../liquid-options'
 
 export class TagToken extends DelimitedToken {
   public name: string
@@ -18,7 +17,7 @@ export class TagToken extends DelimitedToken {
     const value = input.slice(begin + tagDelimiterLeft.length, end - tagDelimiterRight.length)
     super(TokenKind.Tag, value, input, begin, end, trimTagLeft, trimTagRight, file)
 
-    const tokenizer = new Tokenizer(this.content, options.operatorsTrie)
+    const tokenizer = new Tokenizer(this.content, options.operators)
     this.name = tokenizer.readTagName()
     if (!this.name) throw new TokenizationError(`illegal tag syntax`, this)
 

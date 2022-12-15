@@ -1,42 +1,24 @@
-import { whiteSpaceCtrl } from './whitespace-ctrl'
-import { NumberToken } from '../tokens/number-token'
-import { IdentifierToken } from '../tokens/identifier-token'
-import { literalValues } from '../util/literal'
-import { LiteralToken } from '../tokens/literal-token'
-import { OperatorToken } from '../tokens/operator-token'
-import { PropertyAccessToken } from '../tokens/property-access-token'
-import { assert } from '../util/assert'
-import { TopLevelToken } from '../tokens/toplevel-token'
-import { FilterArg } from './filter-arg'
-import { FilterToken } from '../tokens/filter-token'
-import { HashToken } from '../tokens/hash-token'
-import { QuotedToken } from '../tokens/quoted-token'
-import { ellipsis } from '../util/underscore'
-import { HTMLToken } from '../tokens/html-token'
-import { TagToken } from '../tokens/tag-token'
-import { Token } from '../tokens/token'
-import { RangeToken } from '../tokens/range-token'
-import { ValueToken } from '../tokens/value-token'
-import { OutputToken } from '../tokens/output-token'
-import { TokenizationError } from '../util/error'
+import { TagToken, HTMLToken, HashToken, QuotedToken, LiquidTagToken, OutputToken, ValueToken, Token, RangeToken, FilterToken, TopLevelToken, PropertyAccessToken, OperatorToken, LiteralToken, IdentifierToken, NumberToken } from '../tokens'
+import { Trie, createTrie, ellipsis, literalValues, assert, TokenizationError, TYPES, QUOTE, BLANK, IDENTIFIER } from '../util'
+import { Operators, Expression } from '../render'
 import { NormalizedFullOptions, defaultOptions } from '../liquid-options'
-import { TYPES, QUOTE, BLANK, IDENTIFIER } from '../util/character'
+import { FilterArg } from './filter-arg'
 import { matchOperator } from './match-operator'
-import { Trie } from '../util/operator-trie'
-import { Expression } from '../render/expression'
-import { LiquidTagToken } from '../tokens/liquid-tag-token'
+import { whiteSpaceCtrl } from './whitespace-ctrl'
 
 export class Tokenizer {
   p = 0
   N: number
   private rawBeginAt = -1
+  private opTrie: Trie
 
   constructor (
     public input: string,
-    private trie: Trie = defaultOptions.operatorsTrie,
-    public file: string = ''
+    operators: Operators = defaultOptions.operators,
+    public file?: string
   ) {
     this.N = input.length
+    this.opTrie = createTrie(operators)
   }
 
   readExpression () {
@@ -62,7 +44,7 @@ export class Tokenizer {
   }
   readOperator (): OperatorToken | undefined {
     this.skipBlank()
-    const end = matchOperator(this.input, this.p, this.trie)
+    const end = matchOperator(this.input, this.p, this.opTrie)
     if (end === -1) return
     return new OperatorToken(this.input, this.p, (this.p = end), this.file)
   }
